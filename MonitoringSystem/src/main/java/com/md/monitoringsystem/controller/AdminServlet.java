@@ -29,10 +29,10 @@ public class AdminServlet extends HttpServlet {
             ObjectMapper mapper = new ObjectMapper();
             User user = mapper.readValue(inputLine.toString(), User.class);
             user.toString();
-            String invitationUrl = userService.createUser(user);
+            int userId = userService.createUser(user);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
-            resp.getWriter().print("{\"invitationUrl\":\"" + invitationUrl + "\"}");
+            resp.getWriter().print("{\"invitationUrl\":\"" + "http://localhost:8080/MonitoringSystem_war_exploded/user/activate?id="+userId+ "\"}");
         }catch(Exception e){
             System.out.println(e.getMessage());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);

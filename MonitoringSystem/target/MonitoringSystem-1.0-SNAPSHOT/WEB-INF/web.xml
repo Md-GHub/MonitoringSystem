@@ -3,22 +3,61 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
+
     <servlet>
-        <servlet-name>CreateServlet</servlet-name>
-        <servlet-class>com.md.monitoringsystem.controller.CreateServlet</servlet-class>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.md.monitoringsystem.controller.LoginServlet</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>CreateServlet</servlet-name>
+        <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/login</url-pattern>
     </servlet-mapping>
+<!--                           1                               -->
+    <filter>
+        <filter-name>RoleBasedAccess</filter-name>
+        <filter-class>com.md.monitoringsystem.filters.RoleBasedAccessFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>RoleBasedAccess</filter-name>
+        <url-pattern>/admin</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleBasedAccess</filter-name>
+        <url-pattern>/users/*</url-pattern>
+    </filter-mapping>
+    <!--                           2                               -->
+    <filter>
+        <filter-name>SecurityFilter</filter-name>
+        <filter-class>com.md.monitoringsystem.filters.SecurityFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SecurityFilter</filter-name>
+        <url-pattern>/login</url-pattern>
+    </filter-mapping>
+
+<!--                          admin servlet                               -->
+
     <servlet>
         <servlet-name>AdminServlet</servlet-name>
         <servlet-class>com.md.monitoringsystem.controller.AdminServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>AdminServlet</servlet-name>
-        <url-pattern>/createuser</url-pattern>
+        <url-pattern>/admin/*</url-pattern>
     </servlet-mapping>
+
+
+
+
+    <servlet>
+        <servlet-name>CreateServlet</servlet-name>
+        <servlet-class>com.md.monitoringsystem.controller.CreateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreateServlet</servlet-name>
+        <url-pattern>/createorg</url-pattern>
+    </servlet-mapping>
+
     <servlet>
         <servlet-name>Activation</servlet-name>
         <servlet-class>com.md.monitoringsystem.controller.ActivationServlet</servlet-class>
@@ -35,7 +74,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>OperatorServlet</servlet-name>
-        <url-pattern>/operator/monitors</url-pattern>
+        <url-pattern>/users/monitors</url-pattern>
     </servlet-mapping>
 
 </web-app>

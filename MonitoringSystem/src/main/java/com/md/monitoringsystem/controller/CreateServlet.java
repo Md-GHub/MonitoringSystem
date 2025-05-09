@@ -5,6 +5,7 @@ import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.UserService;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,19 +17,9 @@ public class CreateServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         /// read the json (username password)
-        BufferedReader reader = req.getReader();
-        StringBuilder inputLine = new StringBuilder();
-        while(reader.ready()){
-            inputLine.append(reader.readLine());
-        }
-        if(inputLine.toString().equals("")){
-            throw new RuntimeException("Bad Request");
-        }
+        User user = (User) ((ServletRequest) req).getAttribute("user");
         try{
-            ObjectMapper mapper = new ObjectMapper();
-            User user = mapper.readValue(inputLine.toString(), User.class);
-            user.toString();
-            userService.createUser(user);
+            userService.createAdmin(user);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
             resp.getWriter().print("{\"status\":\"success\"}");
@@ -36,7 +27,7 @@ public class CreateServlet extends HttpServlet {
             System.out.println(e.getMessage());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.setContentType("application/json");
-            resp.getWriter().print("{\"status\":\"error\"}");
+            resp.getWriter().print("{\"status\":\"error\",\"message\":\""+e.getMessage()+"\"}");
         }
     }
 }

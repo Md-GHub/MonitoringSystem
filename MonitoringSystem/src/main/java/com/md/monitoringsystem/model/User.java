@@ -8,9 +8,19 @@ public class User {
     private String password;
     private String email;
     private Role role;
+    private boolean isActive;
+
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public void setRole(Role role) {

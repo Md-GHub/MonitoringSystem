@@ -45,17 +45,18 @@ public class OperatorServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getRequestURI();
-        if(path.endsWith("/monitors$")){
-            List<Monitor> monitors = operatorService.getAllMonitor();
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("application/json");
-            resp.getWriter().print(new ObjectMapper().writeValueAsString(monitors));
-        }else{
-            int id = Integer.parseInt(req.getParameter("id"));
+        if(path.endsWith("/monitors") && req.getParameter("mid")!=null){
+            int id = Integer.parseInt(req.getParameter("mid"));
             Monitor monitor = operatorService.getMonitorById(id);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.setContentType("application/json");
             resp.getWriter().print(new ObjectMapper().writeValueAsString(monitor));
+        }else{
+            List<Monitor> monitors = operatorService.getAllMonitor();
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.setContentType("application/json");
+            resp.getWriter().print(new ObjectMapper().writeValueAsString(monitors));
+
         }
     }
 

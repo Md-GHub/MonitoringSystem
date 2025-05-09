@@ -1,5 +1,6 @@
 package com.md.monitoringsystem.service;
 
+import com.md.monitoringsystem.exception.ErrorInCreatingUser;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.repo.OrgRepo;
 import com.md.monitoringsystem.repo.RoleRepo;
@@ -11,38 +12,47 @@ public class UserService {
     private OrgRepo orgRepo = OrgRepo.get();
     private RoleRepo roleRepo = RoleRepo.get();
     private UserRoleRepo userRoleRepo = UserRoleRepo.get();
-    public String createUser(User user){
-        /// check if the org is already exists
+    public int createAdmin(User user){
         String email = user.getEmail();
         String[] domain = email.split("@");
-        System.out.println(domain[domain.length-1]);
         String orgName = domain[domain.length-1];
-        int orgId = orgRepo.isExist(orgName);
-        /// else create an user with admin role and add the organization details to the table
-        if(orgId == -1){
+        int createdOrgId;
+        int createdUser;
+        int roleId;
+        try{
             // add the organization to the table
-            int createdOrgId = orgRepo.addOrg(orgName);
-
-
+            createdOrgId = orgRepo.addOrg(orgName);
             // add user to user table
-            int createdUser = userRepo.addUser(user,createdOrgId);
-
-
+            createdUser = userRepo.addUser(user,createdOrgId,true);
             // get role id for admin
-            int roleId = roleRepo.getRoleId("ADMIN");
-
-
+            roleId = roleRepo.getRoleId(user.getRole().toString());
             // add role id and user id to the user role table
             userRoleRepo.insertUserRole(roleId,createdUser);
-        }else{
-            /// note : get the orgId in the filter and add that to the thread local or any universal store
-            int createdUser = userRepo.addUser(user,10);
-            int roleId = roleRepo.getRoleId(user.getRole().toString());
-            userRoleRepo.insertUserRole(roleId,createdUser);
-            String invitationlink = "http://localhost:8080/MonitoringSystem_war_exploded/user/activate?id="+createdUser;
-            return invitationlink;
+        }catch(ErrorInCreatingUser e) {
+            throw new ErrorInCreatingUser("Error creating user");
         }
-        return "";
+        return createdUser;
+    }
+    public int createUser(User user){
+        String email = user.getEmail();
+        String[] domain = email.split("@");
+        String orgName = domain[domain.length-1];
+        int orgId;
+        int createdUser;
+        int roleId;
+        try{
+            // add the organization to the table
+            orgId = orgRepo.getOrgId(orgName.split(".")[0]);
+            // add user to user table
+            createdUser = userRepo.addUser(user,orgId,false);
+            // get role id for admin
+            roleId = roleRepo.getRoleId(user.getRole().toString());
+            // add role id and user id to the user role table
+            userRoleRepo.insertUserRole(roleId,createdUser);
+        }catch(ErrorInCreatingUser e) {
+            throw new ErrorInCreatingUser("Error creating user");
+        }
+        return createdUser;
     }
 
     public void activateUser(int id) {
