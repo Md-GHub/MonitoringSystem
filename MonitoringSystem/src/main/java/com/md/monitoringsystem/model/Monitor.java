@@ -10,7 +10,25 @@ public class Monitor {
     private String status;
     private String interval;
     private java.util.Date lastUpdate = new java.util.Date();
+    private int noOfFails = 3;
     private boolean isActive = true;
+    private int tempCount = 0;
+
+    public int getTempCount() {
+        return tempCount;
+    }
+
+    public void setTempCount(int tempCount) {
+        this.tempCount = tempCount;
+    }
+
+    public int getNoOfFails() {
+        return noOfFails;
+    }
+
+    public void setNoOfFails(int noOfFails) {
+        this.noOfFails = noOfFails;
+    }
 
     public Date getLastUpdate() {
         return lastUpdate;

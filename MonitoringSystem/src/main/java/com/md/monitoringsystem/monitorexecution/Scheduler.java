@@ -1,50 +1,108 @@
 package com.md.monitoringsystem.monitorexecution;
 
-import java.sql.Time;
-import java.sql.Timestamp;
+
+
+import com.md.monitoringsystem.model.Monitor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
-public class Scheduler implements Runnable {
-    private Map<Integer, List<Monitor>> monitors = new HashMap<Integer, List<Monitor>>();
-
-
-
-    public void addMonitor(Monitor monitor) {
-        int interval = Integer.parseInt(monitor.getInterval());
-        monitors.put(interval , monitors.getOrDefault(interval,new ArrayList<>()));
-        monitors.get(interval).add(monitor);
+public class Scheduler {
+    private HashMap<Integer, List<Monitor>> monitors = new HashMap<>();
+    private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+    private ThreadPool pool = new ThreadPool();
+    public void serve(){
+        service.scheduleAtFixedRate(() -> {
+            for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+                int currentSeconds = (int) (System.currentTimeMillis() / 1000);
+                int currentInterval = entry.getKey();
+                if(currentSeconds%currentInterval == 0){
+                    List<Monitor> batch = monitors.get(currentInterval);
+                    for(Monitor monitor : batch){
+                        pool.submit(new Task(monitor));
+                    }
+                }
+            }
+        },0, 1L, TimeUnit.SECONDS);
     }
 
-    public Map<Integer, List<Monitor>> getMonitors() {
+    public void addMonitor(Monitor monitor){
+        if(!monitors.containsKey(monitor.getInterval())){
+            List<Monitor> batch = new ArrayList<>();
+            batch.add(monitor);
+            monitors.put(Integer.parseInt(monitor.getInterval()), batch);
+        }else{
+            monitors.get(monitor.getInterval()).add(monitor);
+        }
+    }
+
+    public HashMap<Integer, List<Monitor>> getMonitors() {
         return monitors;
     }
 
-    public void setMonitors(Map<Integer, List<Monitor>> monitors) {
+    public void setMonitors(HashMap<Integer, List<Monitor>> monitors) {
         this.monitors = monitors;
     }
 
-    @Override
-    public void run() {
-        while (true) {
-            for (Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()) {
-                int interval = entry.getKey();
-                List<Monitor> monitors = entry.getValue();
-                long lastUpdate = monitors.get(0).getLastUpdate().getTime();
-                long now = new Timestamp(System.currentTimeMillis()).getTime();
-                long diff = new Timestamp(interval*60*1000).getTime(); // in min
-                System.out.println(now - lastUpdate +" "+ diff);
-
-                for (Monitor monitor : monitors) {
-                    monitor.setLastUpdate(new Timestamp(now));
+    public void updateMonitorStatus(int id, String status) {
+        for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+            List<Monitor> batch = entry.getValue();
+            for(Monitor monitor : batch){
+                if(monitor.getId() == id){
+                    monitor.setStatus(status);
+                    break;
                 }
             }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        }
+    }
+
+    public void updateMonitorInterval(int id, String interval) {
+        for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+            List<Monitor> batch = entry.getValue();
+            for(Monitor monitor : batch){
+                if(monitor.getId() == id){
+                    monitor.setInterval(interval);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void updateMonitorActive(int id, boolean Active) {
+        for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+            List<Monitor> batch = entry.getValue();
+            for(Monitor monitor : batch){
+                if(monitor.getId() == id){
+                    monitor.setActive(Active);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void deleteMonitor(int id) {
+        for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+            List<Monitor> batch = entry.getValue();
+            for(Monitor monitor : batch){
+                if(monitor.getId() == id){
+                    batch.remove(monitor);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void updateNoOfFails(int id, int noOfFails) {
+        for(Map.Entry<Integer, List<Monitor>> entry : monitors.entrySet()){
+            List<Monitor> batch = entry.getValue();
+            for(Monitor monitor : batch){
+                if(monitor.getId() == id){
+                    monitor.setNoOfFails(noOfFails);
+                    break;
+                }
             }
         }
     }

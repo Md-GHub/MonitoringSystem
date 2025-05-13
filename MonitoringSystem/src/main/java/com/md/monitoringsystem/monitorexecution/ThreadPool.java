@@ -4,7 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ThreadPool {
-    ExecutorService executor = Executors.newFixedThreadPool(50);
+    private ExecutorService executor = Executors.newFixedThreadPool(50);
+
     public void submit(Runnable task) {
         executor.submit(task);
     }

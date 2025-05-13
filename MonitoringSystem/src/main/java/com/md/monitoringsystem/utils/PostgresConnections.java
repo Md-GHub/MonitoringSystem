@@ -10,11 +10,11 @@ import java.util.Queue;
 
 public class PostgresConnections {
     private static Queue<Connection> connectionPool = new LinkedList<>();
-    private static int MAX_CONNECTIONS = 5;
+    private static int MAX_CONNECTIONS = 20;
     private static String URL = "jdbc:postgresql://localhost:5432/MonitoringSystem";
     private static String USER = "postgres";
     private static String PASSWORD = "080703";
-    static {
+    public static void createConnection() {
         for (int i = 0; i < MAX_CONNECTIONS; i++) {
             try {
                 Class.forName("org.postgresql.Driver");

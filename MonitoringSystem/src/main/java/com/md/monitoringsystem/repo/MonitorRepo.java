@@ -18,7 +18,11 @@ public class MonitorRepo {
     private String updateStatus = "UPDATE MONITOR SET STATUS = ? WHERE MONITOR_ID = ?";
     private String updateInterval = "UPDATE MONITOR SET INTERVAL = ? WHERE MONITOR_ID = ?";
     private String updateEnabled = "UPDATE MONITOR SET active = ? WHERE MONITOR_ID = ?";
-
+    private String getAllMonitorsInterval= "SELECT distinct interval FROM MONITOR";
+    private String getAllMonitorsByInterval = "SELECT * FROM MONITOR where interval = ?";
+    private String updateFails = "UPDATE MONITOR SET no_of_fails = ? WHERE MONITOR_ID = ?";
+    private String countMonitors = "SELECT COUNT(MONITOR_ID) FROM MONITOR";
+    private String countMonitor;
     private static MonitorRepo instance = null;
     public static MonitorRepo get() {
         if (instance == null) {
@@ -87,6 +91,7 @@ public class MonitorRepo {
                 monitor.setStatus(rs.getString("STATUS"));
                 monitor.setInterval(rs.getString("INTERVAL"));
                 monitor.setActive(rs.getBoolean("ACTIVE"));
+                monitor.setNoOfFails(rs.getInt("no_of_fails"));
                 return monitor;
             }
         }catch (SQLException e){
@@ -162,5 +167,90 @@ public class MonitorRepo {
         }finally {
             PostgresConnections.returnConnection(conn);
         }
+    }
+
+    public List<Integer> loadIntervals() {
+        Connection conn = PostgresConnections.getConnection();
+        List<Integer> intervals = new ArrayList<>();
+        try(Statement statement = conn.createStatement()){
+            ResultSet rs = statement.executeQuery(getAllMonitorsInterval);
+            while (rs.next()) {
+                intervals.add(Integer.parseInt(rs.getString("INTERVAL")));
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+        return intervals;
+    }
+
+    public List<Monitor> getAllMonitorByIntervals(Integer interval) {
+        Connection conn = PostgresConnections.getConnection();
+        List<Monitor> monitors = new ArrayList<>();
+        try(PreparedStatement statement = conn.prepareStatement(getAllMonitorsByInterval)){
+            statement.setString(1, interval.toString());
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                Monitor monitor = new Monitor();
+                monitor.setId(rs.getInt("MONITOR_ID"));
+                monitor.setMonitorName(rs.getString("MONITOR_NAME"));
+                monitor.setUrl(rs.getString("URL"));
+                monitor.setStatus(rs.getString("STATUS"));
+                monitor.setInterval(rs.getString("INTERVAL"));
+                monitor.setActive(rs.getBoolean("ACTIVE"));
+                monitor.setNoOfFails(rs.getInt("no_of_fails"));
+                monitors.add(monitor);
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+        return monitors;
+    }
+
+    public void setUpdateFails(int id, int noOfFails) {
+        Connection conn = PostgresConnections.getConnection();
+        try(PreparedStatement statement = conn.prepareStatement(updateFails)){
+            statement.setInt(1, noOfFails);
+            statement.setInt(2, id);
+            int result = statement.executeUpdate();
+            if(result == 0){
+                throw new NoMonitorFounded("No monitor found ");
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+    }
+
+    public int countOfMonitor() {
+        Connection conn = PostgresConnections.getConnection();
+        try(Statement statement = conn.createStatement()){
+            ResultSet rs = statement.executeQuery(countMonitors);
+            rs.next();
+            return rs.getInt(1);
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+        return 0;
+    }
+
+    public int countUptimReq() {
+        Connection conn = PostgresConnections.getConnection();
+        try(PreparedStatement statement = conn.prepareStatement(countMonitors)){
+            ResultSet rs = statement.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+        return 0;
     }
 }

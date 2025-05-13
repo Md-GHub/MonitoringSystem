@@ -95,4 +95,18 @@ public class OperatorService {
         monitorAudit.setRemark("UPDATED - active from "+monitorFromDb.isActive()+" to "+isActive);
         auditRepo.insert(monitorAudit);
     }
+
+    public void updateNoOfFails(int id, int noOfFails, User user) {
+        Monitor monitorFromDb = monitorRepo.getMonitorById(id);
+        monitorRepo.setUpdateFails(id,noOfFails);
+
+        Monitor monitor = new Monitor();
+        monitor.setId(id);
+        monitorRepo.addMonitor(monitor);
+        MonitorAudit monitorAudit = new MonitorAudit();
+        monitorAudit.setUser(user);
+        monitorAudit.setMonitor(monitor);
+        monitorAudit.setRemark("UPDATED - No fails from "+monitorFromDb.isActive()+" to "+noOfFails);
+        auditRepo.insert(monitorAudit);
+    }
 }
