@@ -1,7 +1,9 @@
 package com.md.monitoringsystem.repo;
 
+import com.md.monitoringsystem.exception.NoMonitorFounded;
 import com.md.monitoringsystem.model.Monitor;
 import com.md.monitoringsystem.utils.PostgresConnections;
+import javafx.geometry.Pos;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ public class MonitorRepo {
     private String selectAllMonitors = "SELECT * FROM MONITOR";
     private String updateStatus = "UPDATE MONITOR SET STATUS = ? WHERE MONITOR_ID = ?";
     private String updateInterval = "UPDATE MONITOR SET INTERVAL = ? WHERE MONITOR_ID = ?";
-    private String updateEnabled = "UPDATE MONITOR SET enabled = ? WHERE MONITOR_ID = ?";
+    private String updateEnabled = "UPDATE MONITOR SET active = ? WHERE MONITOR_ID = ?";
 
     private static MonitorRepo instance = null;
     public static MonitorRepo get() {
@@ -26,7 +28,7 @@ public class MonitorRepo {
     }
 
 
-    public void addMonitor(Monitor monitor) {
+    public int addMonitor(Monitor monitor) {
         Connection conn = PostgresConnections.getConnection();
         try(PreparedStatement statement = conn.prepareStatement(createMonitor)){
             statement.setString(1, monitor.getMonitorName());
@@ -36,16 +38,37 @@ public class MonitorRepo {
             statement.setBoolean(5,monitor.isActive());
             statement.setString(6,monitor.getLastUpdate().toString());
             statement.executeUpdate();
+            return getMonitorIdByUrl(monitor.getUrl());
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+        return 0;
+    }
+
+    private int getMonitorIdByUrl(String url) {
+        Connection conn = PostgresConnections.getConnection();
+        try(PreparedStatement statement = conn.prepareStatement("SELECT MONITOR_ID FROM MONITOR WHERE URL = ?")){
+            statement.setString(1, url);
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                return result.getInt("MONITOR_ID");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
+        return -1;
     }
 
     public void deleteMonitor(int id) {
         Connection conn = PostgresConnections.getConnection();
         try(PreparedStatement statement = conn.prepareStatement(deleteMonitor)){
             statement.setInt(1, id);
-            statement.executeUpdate();
+            int result = statement.executeUpdate();
+            if (result == 0) {
+                throw new NoMonitorFounded("No monitor found ");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -98,9 +121,14 @@ public class MonitorRepo {
         try(PreparedStatement statement = conn.prepareStatement(updateStatus)){
             statement.setInt(2, id);
             statement.setString(1, status);
-            statement.executeUpdate();
+            int result = statement.executeUpdate();
+            if(result == 0){
+                throw new NoMonitorFounded("No monitor found ");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
         }
     }
 
@@ -109,20 +137,30 @@ public class MonitorRepo {
         try(PreparedStatement statement = conn.prepareStatement(updateInterval)){
             statement.setInt(2, id);
             statement.setString(1, updateTime);
-            statement.executeUpdate();
+            int result = statement.executeUpdate();
+            if(result == 0){
+                throw new NoMonitorFounded("No monitor found ");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
         }
     }
 
     public void setUpdateEnabled(int id, boolean isEnabled) {
         Connection conn = PostgresConnections.getConnection();
         try(PreparedStatement statement = conn.prepareStatement(updateEnabled)){
-            statement.setInt(2, id);
             statement.setBoolean(1, isEnabled);
-            statement.executeUpdate();
+            statement.setInt(2, id);
+            int result = statement.executeUpdate();
+            if(result == 0){
+                throw new NoMonitorFounded("No monitor found ");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
         }
     }
 }

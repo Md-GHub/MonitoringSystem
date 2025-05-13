@@ -10,7 +10,7 @@ import java.util.Queue;
 
 public class PostgresConnections {
     private static Queue<Connection> connectionPool = new LinkedList<>();
-    private static int MAX_CONNECTIONS = 10;
+    private static int MAX_CONNECTIONS = 5;
     private static String URL = "jdbc:postgresql://localhost:5432/MonitoringSystem";
     private static String USER = "postgres";
     private static String PASSWORD = "080703";

@@ -38,26 +38,30 @@ public class SecurityFilter implements Filter {
         User user = mapper.readValue(inputLine.toString(), User.class);
         String name = user.getEmail().split("@")[1];
 
-
-
-        if(orgRepo.isExist(name) == -1){
+        int orgId = orgRepo.isExist(name);
+        int orgCount = orgRepo.countOrg();
+        if(orgId == -1 && orgCount == 0){
             req.setAttribute("user", user);
             RequestDispatcher requestDispatcher = req.getRequestDispatcher("/createorg");
             requestDispatcher.forward(req, servletResponse);
+        }else if(orgId == -1 && orgCount == 1){
+            resp.setContentType("application/json");
+            resp.setStatus(400);
+            resp.getWriter().print("{\"status\":\"failure\",\"message\":\"one organization already exists\"}");
         }else{
             try{
                 User userFromDb = userRepo.getUserDetails(user.getEmail());
-
                 if(userFromDb == null){
                     throw new UserNotInvited("User not invited");
                 }
-                if(userFromDb.isActive() == true) {
+                if(userFromDb.getPassword() != null) {
                     int roleId = userRoleRepo.getRoleIdByUserId(userFromDb.getUserId());
                     Role role = roleRepo.getRoleById(roleId);
                     userFromDb.setUserName(user.getUserName());
                     userFromDb.setPassword(user.getPassword());
                     userFromDb.setRole(role);
-                    servletRequest.setAttribute("user", userFromDb);
+                    System.out.println(userFromDb.getRole());
+                    servletRequest.setAttribute("userObj", userFromDb);
                     filterChain.doFilter(servletRequest, servletResponse);
                 }else{
                     throw new Security("Change the password first before login");

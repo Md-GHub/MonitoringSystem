@@ -5,44 +5,75 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.md.monitoringsystem.constant.Role;
 import com.md.monitoringsystem.model.User;
 
 import java.util.Date;
 
-public class JwtManager {
-    public static void main(String[] args) {
-//        DecodedJWT jwt = verifyToken(createJwt("mohamed"));
-//        System.out.println(jwt.getClaims());
-//        System.out.println(jwt.getSubject());
-//        System.out.println(jwt.getIssuedAt());
-//        System.out.println(jwt.getExpiresAt());
-    }
-    private static String SECRET_KEY = "secretKey";
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 
-    public static String createJwt(User user) {
-        Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
+import java.util.Date;
+
+public class JwtManager {
+    private static final String SECRET = "mySecretKey123!";
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60;
+
+    private final Algorithm algorithm;
+    private final JWTVerifier verifier;
+
+    public JwtManager() {
+        this.algorithm = Algorithm.HMAC256(SECRET);
+        this.verifier = JWT.require(algorithm).build();
+    }
+
+    // Create token
+    public String generateToken(User user) {
         return JWT.create()
-                .withIssuer("auth")
-                .withClaim("role",user.getRole().toString()) /// need to change
                 .withSubject(user.getUserName())
+                .withClaim("userid", user.getUserId())
+                .withClaim("email", user.getEmail())
+                .withClaim("password", user.getPassword())
+                .withClaim("role", user.getRole().toString())
                 .withIssuedAt(new Date())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 3600 * 1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .sign(algorithm);
     }
-    public static DecodedJWT verifyToken(String token) {
+
+    // Validate token
+    public boolean validateToken(String token) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
-
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("auth")
-                    .build();
-
-            DecodedJWT decodedJWT = verifier.verify(token);
-            return decodedJWT;
-        } catch (JWTVerificationException exception) {
-            System.out.println("Invalid token: " + exception.getMessage());
-            return null;
+            verifier.verify(token);
+            return true;
+        } catch (JWTVerificationException e) {
+            return false;
         }
     }
-}
 
+    // extract user id
+    public int getUserId(String token) {
+        DecodedJWT decoded = verifier.verify(token);
+        int id  = decoded.getClaim("userid").asInt();
+        return id;
+    }
+    // Extract username
+    public String getUsername(String token) {
+        DecodedJWT decoded = verifier.verify(token);
+        return decoded.getSubject();
+    }
+
+    // extract Role
+    public Role getUserRole(String token) {
+        DecodedJWT decoded = verifier.verify(token);
+        return Role.valueOf(decoded.getClaim("role").asString());
+    }
+
+    //extract email
+    public Role getUserEmail(String token) {
+        DecodedJWT decoded = verifier.verify(token);
+        return Role.valueOf(decoded.getClaim("email").asString());
+    }
+}

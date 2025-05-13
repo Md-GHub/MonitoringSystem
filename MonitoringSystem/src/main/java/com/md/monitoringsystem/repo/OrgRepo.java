@@ -2,10 +2,7 @@ package com.md.monitoringsystem.repo;
 
 import com.md.monitoringsystem.utils.PostgresConnections;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class OrgRepo {
     private static OrgRepo instance = null;
@@ -56,13 +53,28 @@ public class OrgRepo {
         Connection con = PostgresConnections.getConnection();
         try(PreparedStatement statement = con.prepareStatement(getOrgId)){
             statement.setString(1,orgName);
-            statement.executeUpdate();
-            return isExist(orgName);
+            ResultSet st = statement.executeQuery();
+            if(st.next()){
+                return st.getInt("ORG_ID");
+            }
         }catch (SQLException e) {
             System.out.println(e.getMessage());
         }finally {
             PostgresConnections.returnConnection(con);
         }
         return -1;
+    }
+
+    public int countOrg() {
+        Connection con = PostgresConnections.getConnection();
+        try(Statement statement = con.createStatement()){
+            ResultSet rs = statement.executeQuery("SELECT COUNT(ORG_ID) AS NUM FROM ORGANIZATION");
+            rs.next();
+            return rs.getInt("NUM");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }finally {
+            PostgresConnections.returnConnection(con);
+        }
     }
 }

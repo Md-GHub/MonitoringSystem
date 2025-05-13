@@ -1,0 +1,33 @@
+package com.md.monitoringsystem.repo;
+
+import com.md.monitoringsystem.model.MonitorAudit;
+import com.md.monitoringsystem.utils.PostgresConnections;
+
+import java.sql.*;
+
+public class MonitorAuditRepo {
+    private String insertData = "INSERT INTO AUDIT(monitor_id,user_id,remark) VALUES(?,?,?)";
+
+    private static MonitorAuditRepo instance = null;
+    public static MonitorAuditRepo get() {
+        if (instance == null) {
+            instance = new MonitorAuditRepo();
+        }
+        return instance;
+    }
+
+    public void insert(MonitorAudit m) {
+        Connection conn = PostgresConnections.getConnection();
+        try(PreparedStatement statement = conn.prepareStatement(insertData)){
+            statement.setInt(1,m.getMonitor().getId());
+            statement.setInt(2,m.getUser().getUserId());
+            statement.setString(3,m.getRemark());
+            statement.executeUpdate();
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }finally {
+            PostgresConnections.returnConnection(conn);
+        }
+    }
+
+}

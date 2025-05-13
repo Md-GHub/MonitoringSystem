@@ -18,11 +18,17 @@ public class CreateServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         /// read the json (username password)
         User user = (User) ((ServletRequest) req).getAttribute("user");
+        if(!isValidPassword(user.getPassword())) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.setContentType("application/json");
+            resp.getWriter().print("{\"status\":\"failure\",\"message\":\"Not an valid password\"}");
+            return;
+        }
         try{
             userService.createAdmin(user);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
-            resp.getWriter().print("{\"status\":\"success\"}");
+            resp.getWriter().print("{\"status\":\"success\",\"message\":\"Account created successfully\"}");
         }catch(Exception e){
             System.out.println(e.getMessage());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -30,4 +36,27 @@ public class CreateServlet extends HttpServlet {
             resp.getWriter().print("{\"status\":\"error\",\"message\":\""+e.getMessage()+"\"}");
         }
     }
+
+    private static boolean isValidPassword(String password) {
+        if (password == null || password.length() < 8) {
+            return false;
+        }
+
+        boolean hasLetter = false;
+        boolean hasDigit = false;
+        boolean hasSpecialChar = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) {
+                hasLetter = true;
+            } else if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else {
+                hasSpecialChar = true;
+            }
+        }
+
+        return hasLetter && hasDigit && hasSpecialChar;
+    }
+
 }

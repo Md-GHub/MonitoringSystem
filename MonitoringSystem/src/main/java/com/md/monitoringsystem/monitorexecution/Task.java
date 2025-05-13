@@ -1,6 +1,5 @@
 package com.md.monitoringsystem.monitorexecution;
 
-import com.md.monitoringsystem.model.Monitor;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,10 +16,11 @@ public class Task implements Runnable {
             String urlString=monitor.getUrl();
             URL url=new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setConnectTimeout(3000);
             connection.setRequestMethod("GET");
 
             int statusCode = connection.getResponseCode();
-            System.out.println(" - Status Code: " + statusCode);
+            System.out.println("Status Code: " + statusCode);
             connection.disconnect();
         }catch(Exception e){
             System.out.println(e.getMessage());

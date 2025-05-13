@@ -13,16 +13,22 @@ import java.io.IOException;
 
 public class LoginServlet extends HttpServlet {
     private LoginService loginService = new LoginService();
+    private JwtManager jwtManager = new JwtManager();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        User user = (User)((HttpServletRequest) req).getAttribute("user");
-
+        Object obj = req.getAttribute("userObj");
+        System.out.println(obj.toString());
+        User user = (User)(obj);
         try{
             loginService.loginUser(user);
-            HttpSession session = req.getSession();
-            session.setAttribute("user", user);
-            session.setMaxInactiveInterval(60*4);
+
+            String token = jwtManager.generateToken(user);
+            Cookie cookie = new Cookie("token", token);
+            resp.addCookie(cookie);
+            System.out.println(jwtManager.getUserRole(token));
+//            HttpSession session = req.getSession();
+//            session.setAttribute("user", user);
+//            session.setMaxInactiveInterval(60*4);
             resp.setContentType("application/json");
             resp.setStatus(200);
             resp.getWriter().print("{\"status\":\"success\",\"message\":\"Login successful\"}");

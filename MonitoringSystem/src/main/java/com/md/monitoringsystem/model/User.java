@@ -2,12 +2,15 @@ package com.md.monitoringsystem.model;
 
 import com.md.monitoringsystem.constant.Role;
 
+import java.util.List;
+
 public class User {
     private int userId;
     private String userName;
     private String password;
     private String email;
     private Role role;
+    private List<String> permissions;
     private boolean isActive;
 
 

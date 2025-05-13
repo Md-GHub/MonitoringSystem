@@ -2,6 +2,7 @@ package com.md.monitoringsystem.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.md.monitoringsystem.exception.NoUserFounded;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.UserService;
 
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.*;
 
 public class AdminServlet extends HttpServlet {
     private UserService userService = new UserService();
@@ -24,11 +25,12 @@ public class AdminServlet extends HttpServlet {
         while(reader.ready()){
             inputLine.append(reader.readLine());
         }
+        ObjectMapper mapper = new ObjectMapper();
+        User user = mapper.readValue(inputLine.toString(), User.class);
+        user.toString();
 
         try{
-            ObjectMapper mapper = new ObjectMapper();
-            User user = mapper.readValue(inputLine.toString(), User.class);
-            user.toString();
+
             int userId = userService.createUser(user);
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/json");
@@ -37,23 +39,26 @@ public class AdminServlet extends HttpServlet {
             System.out.println(e.getMessage());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.setContentType("application/json");
-            resp.getWriter().print("{\"status\":\"error\"}");
+            resp.getWriter().print("{\"status\":\"success\",\"message\":\""+e.getMessage()+"\"}");
         }
 
     }
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int id = Integer.parseInt(req.getParameter("id"));
-
+//        int id = Integer.parseInt(req.getParameter("id"));
+        String email = req.getParameter("email");
         try{
-            userService.deleteUser(id);
+//            userService.deleteUser(id);
+            userService.deleteUser(email);
             resp.setContentType("application/json");
-            resp.setStatus(200);
             resp.getWriter().print("{\"status\":\"success\",\"message\":\"User Deleted Successfully\"}");
-        }catch (Exception e){
+//            resp.setStatus(SC_NO_CONTENT);
+            resp.setStatus(SC_OK);
+        }catch (NoUserFounded e){
             System.out.println(e.getMessage());
             resp.setContentType("application/json");
             resp.setStatus(SC_BAD_REQUEST);
-            resp.getWriter().print("{\"status\":\"success\",\"message\":\"cant delete user\"}");
+            resp.getWriter().print("{\"status\":\"success\",\"message\":\""+e.getMessage()+"\"}");
         }
     }
+
 }
