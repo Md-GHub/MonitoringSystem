@@ -2,8 +2,8 @@ package com.md.monitoringsystem.repo;
 
 import com.md.monitoringsystem.exception.NoMonitorFounded;
 import com.md.monitoringsystem.model.Monitor;
+import com.md.monitoringsystem.model.PublicUpDownTime;
 import com.md.monitoringsystem.utils.PostgresConnections;
-import javafx.geometry.Pos;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class MonitorRepo {
 //     name, target_url, expected_status_code(s), check_interval (in seconds), enabled (bool)
-    private String createMonitor = "INSERT INTO MONITOR(MONITOR_NAME,URL,STATUS,INTERVAL,ACTIVE,LAST_UPDATE) VALUES(?,?,?,?,?,?)";
+    private String createMonitor = "INSERT INTO MONITOR(MONITOR_NAME,URL,STATUS,INTERVAL,ACTIVE) VALUES(?,?,?,?,?)";
     private String deleteMonitor = "DELETE FROM MONITOR WHERE MONITOR_ID = ?";
     private String selectMonitorByid = "SELECT * FROM MONITOR WHERE MONITOR_ID = ?";
     private String selectAllMonitors = "SELECT * FROM MONITOR";
@@ -21,8 +21,11 @@ public class MonitorRepo {
     private String getAllMonitorsInterval= "SELECT distinct interval FROM MONITOR";
     private String getAllMonitorsByInterval = "SELECT * FROM MONITOR where interval = ?";
     private String updateFails = "UPDATE MONITOR SET no_of_fails = ? WHERE MONITOR_ID = ?";
-    private String countMonitors = "SELECT COUNT(MONITOR_ID) FROM MONITOR";
-    private String countMonitor;
+
+    private String monitorJoinResult1 = "SELECT m.monitor_id AS monitor_id,m.monitor_name,SUM(CASE WHEN r.success_status = 'true' THEN 1 ELSE 0 END) AS upCount,SUM(CASE WHEN r.success_status = 'false' THEN 1 ELSE 0 END) AS downCount, s.status FROM monitor m LEFT JOIN monitor_result r ON m.monitor_id = r.monitor_id left join monitor_current_status s on m.monitor_id = s.monitor_id WHERE  r.timestamp >= NOW() - INTERVAL \'";
+    private String monitorJoinResult2 =  "\' GROUP BY m.monitor_id, m.monitor_name,s.status LIMIT 10 OFFSET ";
+
+    private String updateRemarks = "UPDATE MONITOR SET remark = ? WHERE MONITOR_ID = ?";
     private static MonitorRepo instance = null;
     public static MonitorRepo get() {
         if (instance == null) {
@@ -40,7 +43,6 @@ public class MonitorRepo {
             statement.setString(3,monitor.getStatus());
             statement.setString(4,monitor.getInterval());
             statement.setBoolean(5,monitor.isActive());
-            statement.setString(6,monitor.getLastUpdate().toString());
             statement.executeUpdate();
             return getMonitorIdByUrl(monitor.getUrl());
         }catch (SQLException e){
@@ -92,6 +94,7 @@ public class MonitorRepo {
                 monitor.setInterval(rs.getString("INTERVAL"));
                 monitor.setActive(rs.getBoolean("ACTIVE"));
                 monitor.setNoOfFails(rs.getInt("no_of_fails"));
+                monitor.setRemarks(rs.getString("remark"));
                 return monitor;
             }
         }catch (SQLException e){
@@ -113,6 +116,7 @@ public class MonitorRepo {
                 monitor.setStatus(rs.getString("STATUS"));
                 monitor.setInterval(rs.getString("INTERVAL"));
                 monitor.setActive(rs.getBoolean("ACTIVE"));
+                monitor.setRemarks(rs.getString("REMARK"));
                 monitors.add(monitor);
             }
         }catch (SQLException e){
@@ -226,31 +230,42 @@ public class MonitorRepo {
         }
     }
 
-    public int countOfMonitor() {
+    public List<PublicUpDownTime> getUptimeAndDowntime(String timeLine,int offsetValue) {
         Connection conn = PostgresConnections.getConnection();
-        try(Statement statement = conn.createStatement()){
-            ResultSet rs = statement.executeQuery(countMonitors);
-            rs.next();
-            return rs.getInt(1);
+        List<PublicUpDownTime> uptimeAndDowntime = new ArrayList<>();
+        String monitorJoinResult = monitorJoinResult1+timeLine+monitorJoinResult2+offsetValue;
+        System.out.println(monitorJoinResult);
+        try(PreparedStatement statement = conn.prepareStatement(monitorJoinResult)){
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                PublicUpDownTime upTime = new PublicUpDownTime();
+                upTime.setMonitorId(rs.getInt("MONITOR_ID"));
+                upTime.setMonitorName(rs.getString("MONITOR_NAME"));
+                upTime.setUpCount(rs.getInt("UPCOUNT"));
+                upTime.setDownCount(rs.getInt("DOWNCOUNT"));
+                upTime.setStatus(rs.getBoolean("status"));
+                uptimeAndDowntime.add(upTime);
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }finally {
             PostgresConnections.returnConnection(conn);
         }
-        return 0;
+        return uptimeAndDowntime;
     }
 
-    public int countUptimReq() {
+    public void setUpdateRemark(String remark, int id) {
         Connection conn = PostgresConnections.getConnection();
-        try(PreparedStatement statement = conn.prepareStatement(countMonitors)){
-            ResultSet rs = statement.executeQuery();
-            rs.next();
-            return rs.getInt(1);
+        try(PreparedStatement statement = conn.prepareStatement(updateRemarks)){
+            statement.setString(1, remark);
+            statement.setInt(2, id);
+            if(statement.executeUpdate() == 0){
+                throw new NoMonitorFounded("No monitor found ");
+            }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }finally {
             PostgresConnections.returnConnection(conn);
         }
-        return 0;
     }
 }

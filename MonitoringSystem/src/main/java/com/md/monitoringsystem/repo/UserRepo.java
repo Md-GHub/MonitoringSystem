@@ -118,7 +118,7 @@ public class UserRepo {
     public void addPassword(int id, String password) {
         Connection con = PostgresConnections.getConnection();
         try(PreparedStatement st = con.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USER_ID = ?")){
-            st.setString(1,password);
+            st.setString(1,bcryptUtil.hashPassword(password));
             st.setInt(2,id);
             st.executeUpdate();
         } catch (SQLException e) {

@@ -22,6 +22,9 @@ public class Scheduler {
                 if(currentSeconds%currentInterval == 0){
                     List<Monitor> batch = monitors.get(currentInterval);
                     for(Monitor monitor : batch){
+                        if(!monitor.isActive()){
+                            continue;
+                        }
                         pool.submit(new Task(monitor));
                     }
                 }

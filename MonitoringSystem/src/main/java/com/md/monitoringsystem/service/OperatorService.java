@@ -3,6 +3,7 @@ package com.md.monitoringsystem.service;
 import com.md.monitoringsystem.exception.NoMonitorFounded;
 import com.md.monitoringsystem.model.Monitor;
 import com.md.monitoringsystem.model.MonitorAudit;
+import com.md.monitoringsystem.model.MonitorCurrentStatus;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.repo.*;
 
@@ -13,6 +14,7 @@ public class OperatorService {
     private MonitorAuditRepo auditRepo = MonitorAuditRepo.get();
     private OrgMonitorRepo orgMonitorRepo = OrgMonitorRepo.get();
     private UserRepo userRepo = UserRepo.get();
+    private MonitorCurrentStatusRepo monitorCurrentStatusRepo = MonitorCurrentStatusRepo.get();
     public void createMonitor(Monitor monitor, User user) throws NoMonitorFounded {
         if(monitor == null){
             throw new IllegalArgumentException("Monitor object cannot be null");
@@ -26,6 +28,10 @@ public class OperatorService {
         auditRepo.insert(monitorAudit);
         int orgId = userRepo.getOrgIdByUserId(user.getUserId());
         orgMonitorRepo.add(monitorId,orgId);
+        MonitorCurrentStatus monitorCurrentStatus = new MonitorCurrentStatus();
+        monitorCurrentStatus.setMonitor(monitor);
+        monitorCurrentStatus.setStatus(true);
+        monitorCurrentStatusRepo.insert(monitorCurrentStatus);
     }
 
     public Monitor getMonitorById(int id) {
@@ -108,5 +114,9 @@ public class OperatorService {
         monitorAudit.setMonitor(monitor);
         monitorAudit.setRemark("UPDATED - No fails from "+monitorFromDb.isActive()+" to "+noOfFails);
         auditRepo.insert(monitorAudit);
+    }
+
+    public void updateRemark(int id, String remark) throws NoMonitorFounded {
+        monitorRepo.setUpdateRemark(remark,id);
     }
 }

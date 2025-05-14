@@ -85,10 +85,7 @@ public class OperatorServlet extends HttpServlet {
         if(req.getParameter("isActive")!=null){
             isActive = Integer.parseInt(req.getParameter("isActive"));
         }
-
-
         User user = (User) req.getAttribute("user");
-
         Scheduler scheduler = (Scheduler) req.getServletContext().getAttribute("scheduler");
 
         try{

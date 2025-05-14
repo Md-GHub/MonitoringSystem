@@ -1,6 +1,7 @@
 package com.md.monitoringsystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.md.monitoringsystem.exception.NoUserFounded;
 import com.md.monitoringsystem.model.LoginCred;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.UserService;
@@ -40,11 +41,16 @@ public class ActivationServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.setStatus(200);
             resp.getWriter().print("{\"status\":\"success\",\"message\":\"Activated Successfully\"}");
+        }catch (NoUserFounded e){
+            System.out.println(e.getMessage());
+            resp.setContentType("application/json");
+            resp.setStatus(SC_BAD_REQUEST);
+            resp.getWriter().print("{\"status\":\"unsuccess\",\"message\":\""+e.getMessage()+"\"}");
         }catch (Exception e){
             System.out.println(e.getMessage());
             resp.setContentType("application/json");
             resp.setStatus(SC_BAD_REQUEST);
-            resp.getWriter().print("{\"status\":\"success\",\"message\":\"unsuccessfully\"}");
+            resp.getWriter().print("{\"status\":\"unsuccess\",\"message\":\""+e.getMessage()+"\"}");
         }
     }
     private static boolean isValidPassword(String password) {

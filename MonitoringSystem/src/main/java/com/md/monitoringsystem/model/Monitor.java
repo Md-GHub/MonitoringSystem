@@ -9,10 +9,18 @@ public class Monitor {
     private String url;
     private String status;
     private String interval;
-    private java.util.Date lastUpdate = new java.util.Date();
     private int noOfFails = 3;
     private boolean isActive = true;
     private int tempCount = 0;
+    private String remarks;
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
     public int getTempCount() {
         return tempCount;
@@ -28,14 +36,6 @@ public class Monitor {
 
     public void setNoOfFails(int noOfFails) {
         this.noOfFails = noOfFails;
-    }
-
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 
     public int getId() {

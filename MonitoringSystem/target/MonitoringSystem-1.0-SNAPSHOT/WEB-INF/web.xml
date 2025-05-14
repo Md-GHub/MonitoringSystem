@@ -77,4 +77,14 @@
         <url-pattern>/users/monitors</url-pattern>
     </servlet-mapping>
 
+
+<!--       public servlet               -->
+    <servlet>
+        <servlet-name>PublicServlet</servlet-name>
+        <servlet-class>com.md.monitoringsystem.controller.PublicServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>PublicServlet</servlet-name>
+        <url-pattern>/status/my-project/*</url-pattern>
+    </servlet-mapping>
 </web-app>

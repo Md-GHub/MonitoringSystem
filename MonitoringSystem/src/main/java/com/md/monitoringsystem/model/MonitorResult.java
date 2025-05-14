@@ -1,6 +1,7 @@
 package com.md.monitoringsystem.model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class MonitorResult {
     private int resultId;
@@ -8,9 +9,17 @@ public class MonitorResult {
     private Date timestamp;
     private String status;
     private boolean isSuccess;
-
+    private Timestamp time;
     public int getResultId() {
         return resultId;
+    }
+
+    public Timestamp getTime() {
+        return time;
+    }
+
+    public void setTime(Timestamp time) {
+        this.time = time;
     }
 
     public void setResultId(int resultId) {
