@@ -1,10 +1,7 @@
 package com.md.monitoringsystem.service;
 
 import com.md.monitoringsystem.exception.NoMonitorFounded;
-import com.md.monitoringsystem.model.Monitor;
-import com.md.monitoringsystem.model.MonitorAudit;
-import com.md.monitoringsystem.model.MonitorCurrentStatus;
-import com.md.monitoringsystem.model.User;
+import com.md.monitoringsystem.model.*;
 import com.md.monitoringsystem.repo.*;
 
 import java.util.List;
@@ -15,6 +12,7 @@ public class OperatorService {
     private OrgMonitorRepo orgMonitorRepo = OrgMonitorRepo.get();
     private UserRepo userRepo = UserRepo.get();
     private MonitorCurrentStatusRepo monitorCurrentStatusRepo = MonitorCurrentStatusRepo.get();
+    private MonitorAuditRepo monitorAuditRepo = MonitorAuditRepo.get();
     public void createMonitor(Monitor monitor, User user) throws NoMonitorFounded {
         if(monitor == null){
             throw new IllegalArgumentException("Monitor object cannot be null");
@@ -118,5 +116,9 @@ public class OperatorService {
 
     public void updateRemark(int id, String remark) throws NoMonitorFounded {
         monitorRepo.setUpdateRemark(remark,id);
+    }
+
+    public List<MonitorAuditDisplay> getAllAudit() {
+        return monitorAuditRepo.getAll();
     }
 }

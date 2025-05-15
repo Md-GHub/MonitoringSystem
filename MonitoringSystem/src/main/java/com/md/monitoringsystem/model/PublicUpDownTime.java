@@ -6,6 +6,15 @@ public class PublicUpDownTime {
     private int upCount;
     private int downCount;
     private boolean status;
+    private int percentage;
+
+    public int getPercentage() {
+        return percentage;
+    }
+
+    public void setPercentage(int percentage) {
+        this.percentage = percentage;
+    }
 
     public int getMonitorId() {
         return monitorId;

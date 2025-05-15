@@ -3,6 +3,7 @@ package com.md.monitoringsystem.service;
 import com.md.monitoringsystem.constant.Role;
 import com.md.monitoringsystem.exception.ErrorInCreatingUser;
 import com.md.monitoringsystem.exception.NoUserFounded;
+import com.md.monitoringsystem.exception.UserAlreadyActivated;
 import com.md.monitoringsystem.model.LoginCred;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.repo.OrgRepo;
@@ -64,7 +65,7 @@ public class UserService {
         userRepo.deleteUser(id);
     }
 
-    public void activateUser(LoginCred emailPassword) {
+    public void activateUser(LoginCred emailPassword) throws NoUserFounded, UserAlreadyActivated {
         int id = userRepo.getUserId(emailPassword.getEmail());
         if(id>0){
             userRepo.addPassword(id,emailPassword.getPassword());

@@ -1,6 +1,7 @@
 package com.md.monitoringsystem.repo;
 
 import com.md.monitoringsystem.exception.NoUserFounded;
+import com.md.monitoringsystem.exception.UserAlreadyActivated;
 import com.md.monitoringsystem.exception.UserNotInvited;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.utils.BcryptUtil;
@@ -117,10 +118,12 @@ public class UserRepo {
 
     public void addPassword(int id, String password) {
         Connection con = PostgresConnections.getConnection();
-        try(PreparedStatement st = con.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USER_ID = ?")){
+        try(PreparedStatement st = con.prepareStatement("UPDATE USERS SET PASSWORD = ? WHERE USER_ID = ? AND (PASSWORD IS NULL OR PASSWORD = '')")){
             st.setString(1,bcryptUtil.hashPassword(password));
             st.setInt(2,id);
-            st.executeUpdate();
+            if(st.executeUpdate()==0){
+                throw new UserAlreadyActivated("User is already activated");
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

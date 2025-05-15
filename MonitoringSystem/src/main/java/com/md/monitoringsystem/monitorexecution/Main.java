@@ -9,14 +9,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class Main {
-//    private int id;
-//    private String monitorName;
-//    private String url;
-//    private String status;
-//    private String interval;
-//    private java.util.Date lastUpdate = new java.util.Date();
-//    private boolean isActive = true;
-
     public static void main(String[] args) {
 //        Monitor monitor1 = new Monitor();
 //        monitor1.setId(30);
@@ -39,16 +31,19 @@ public class Main {
 //        scheduler.addMonitor(monitor2);
 //        scheduler.serve();
 
-        Connection connections = PostgresConnections.getConnection();
-        String selectAllFromMonitorGroupByIntervals = "SELECT * FROM MONITOR GROUP BY interval";
-        try(Statement statement = connections.createStatement()){
-            ResultSet rs = statement.executeQuery(selectAllFromMonitorGroupByIntervals);
-            while(rs.next()){
-
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
+//        Connection connections = PostgresConnections.getConnection();
+//        String selectAllFromMonitorGroupByIntervals = "SELECT * FROM MONITOR GROUP BY interval";
+//        try(Statement statement = connections.createStatement()){
+//            ResultSet rs = statement.executeQuery(selectAllFromMonitorGroupByIntervals);
+//            while(rs.next()){
+//
+//            }
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+        int l1 = "$2a$10$/Fyq3/sSvTY4dYtseiHCL.sYVNGeDUWT9H1xNOgvOeKeyxLknUdPK".length();
+        int l2 = "$2a$10$E1YaF4X9cCsvoHDp7ki/IehLYvos50WAFrTn7IFsuIGyfoHn2OEAa".length();
+        int l3 = "$2a$10$y/y48G0qLxIJ8wXN5lu9XeB7KYhFK.qylDT65n5Ok1.7CWidUljTC".length();
+        System.out.println((l1==l2 && l1==l3)+" "+l1);
     }
 }

@@ -5,15 +5,19 @@ import com.md.monitoringsystem.exception.UsernamePasswordError;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.LoginService;
 import com.md.monitoringsystem.utils.JwtManager;
+import com.md.monitoringsystem.utils.LoggerUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 public class LoginServlet extends HttpServlet {
     private LoginService loginService = new LoginService();
     private JwtManager jwtManager = new JwtManager();
+    private Logger logger = LoggerUtils.getLogger();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Object obj = req.getAttribute("userObj");
@@ -36,6 +40,12 @@ public class LoginServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.setStatus(400);
             resp.getWriter().print("{\"status\":\"failure\",\"message\":\""+e.getMessage()+"\"}");
+            logger.info(new Timestamp(System.currentTimeMillis())+" "+e.getMessage());
+        }catch (Exception e){
+            resp.setContentType("application/json");
+            resp.setStatus(400);
+            resp.getWriter().print("{\"status\":\"failure\",\"message\":\""+e.getMessage()+"\"}");
+            logger.info(new Timestamp(System.currentTimeMillis())+" "+e.getMessage());
         }
     }
 }

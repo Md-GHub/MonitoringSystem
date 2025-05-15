@@ -1,8 +1,7 @@
 package com.md.monitoringsystem.repo;
 
+import com.md.monitoringsystem.model.MonitorHistory;
 import com.md.monitoringsystem.model.MonitorResult;
-import com.md.monitoringsystem.model.PublicMonitorHistory;
-import com.md.monitoringsystem.model.PublicMonitorHistoryBuilder;
 import com.md.monitoringsystem.utils.PostgresConnections;
 
 
@@ -13,7 +12,7 @@ import java.util.List;
 public class MonitorResultRepo {
     private String monitorJoinMonitorResult = "select r.time,m.remark remark,m.monitor_id, m.monitor_name,m.url,m.status status_expected,m.interval,m.active,r.response_time,r.timestamp,r.status status_received,r.success_status from monitor m left join monitor_result r on m.monitor_id=r.monitor_id order by r.time desc limit 10 offset ? ";
     private String insertIntoResult = "INSERT INTO MONITOR_RESULT(monitor_id,response_time,timestamp,status,success_status,time) VALUES(?,?,?,?,?,?)";
-
+    private String monitorHistoryQuery = "SELECT m.monitor_id,m.monitor_name,r.* FROM resolve_time r left join monitor m on r.monitor_id = m.monitor_id ORDER BY downat desc,resolvedat DESC";
     private static MonitorResultRepo instance = null;
     public static MonitorResultRepo get() {
         if (instance == null) {
@@ -64,23 +63,19 @@ public class MonitorResultRepo {
 //        return monitorResults;
 //    }
 
-    public List<PublicMonitorHistory> getAllMonitorResult(int offset) {
+    public List<MonitorHistory> getAllMonitorResult(int offset) {
         Connection conn = PostgresConnections.getConnection();
-        List<PublicMonitorHistory> monitorResults = new ArrayList<>();
-        try(PreparedStatement statement = conn.prepareStatement(monitorJoinMonitorResult)){
-            statement.setInt(1,offset);
+        List<MonitorHistory> monitorResults = new ArrayList<>();
+        try(PreparedStatement statement = conn.prepareStatement(monitorHistoryQuery)){
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                PublicMonitorHistory p = new PublicMonitorHistoryBuilder()
-                        .setMonitorId(resultSet.getInt("monitor_id"))
-                        .setMonitorName(resultSet.getString("monitor_name"))
-                        .setUrl(resultSet.getString("url"))
-                        .setTime(resultSet.getTimestamp("time"))
-//                                                .setStatusReceived(resultSet.getString("status_received"))
-                        .setSuccess_status(resultSet.getBoolean("success_status"))
-                        .setRemark(resultSet.getString("remark"))
-                        .build();
-                monitorResults.add(p);
+                MonitorHistory monitorHistory = new MonitorHistory();
+                monitorHistory.setMonitorId(resultSet.getInt("monitor_id"));
+                monitorHistory.setMonitorName(resultSet.getString("monitor_name"));
+                monitorHistory.setDownAt(resultSet.getTimestamp("downat"));
+                monitorHistory.setUpAt(resultSet.getTimestamp("resolvedat"));
+                monitorHistory.setRemarks(resultSet.getString("reason_for_down"));
+                monitorResults.add(monitorHistory);
             }
         }catch (SQLException e) {
             System.out.println(e.getMessage());

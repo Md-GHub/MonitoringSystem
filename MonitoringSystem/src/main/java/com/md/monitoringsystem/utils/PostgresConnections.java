@@ -3,9 +3,7 @@ package com.md.monitoringsystem.utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.ArrayDeque;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class PostgresConnections {

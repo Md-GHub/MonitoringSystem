@@ -12,15 +12,6 @@ public class Monitor {
     private int noOfFails = 3;
     private boolean isActive = true;
     private int tempCount = 0;
-    private String remarks;
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
 
     public int getTempCount() {
         return tempCount;

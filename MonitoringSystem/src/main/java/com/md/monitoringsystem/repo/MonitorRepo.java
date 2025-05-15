@@ -94,7 +94,6 @@ public class MonitorRepo {
                 monitor.setInterval(rs.getString("INTERVAL"));
                 monitor.setActive(rs.getBoolean("ACTIVE"));
                 monitor.setNoOfFails(rs.getInt("no_of_fails"));
-                monitor.setRemarks(rs.getString("remark"));
                 return monitor;
             }
         }catch (SQLException e){
@@ -116,7 +115,6 @@ public class MonitorRepo {
                 monitor.setStatus(rs.getString("STATUS"));
                 monitor.setInterval(rs.getString("INTERVAL"));
                 monitor.setActive(rs.getBoolean("ACTIVE"));
-                monitor.setRemarks(rs.getString("REMARK"));
                 monitors.add(monitor);
             }
         }catch (SQLException e){
@@ -244,6 +242,11 @@ public class MonitorRepo {
                 upTime.setUpCount(rs.getInt("UPCOUNT"));
                 upTime.setDownCount(rs.getInt("DOWNCOUNT"));
                 upTime.setStatus(rs.getBoolean("status"));
+                int totalRequest = upTime.getUpCount()+upTime.getDownCount();
+                int uptime = upTime.getUpCount();
+                float percentage = (float) uptime/totalRequest *100;
+
+                upTime.setPercentage((int) percentage);
                 uptimeAndDowntime.add(upTime);
             }
         }catch (SQLException e){

@@ -26,10 +26,12 @@ public class RoleBasedAccessFilter implements Filter {
         System.out.println("Called once");
         Cookie[] cookies = request.getCookies();
         String token = null;
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("token")) {
-                token = cookie.getValue();
-                break;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("token")) {
+                    token = cookie.getValue();
+                    break;
+                }
             }
         }
         System.out.println(token);
@@ -51,11 +53,11 @@ public class RoleBasedAccessFilter implements Filter {
         user.setRole(role);
         user.setEmail(userEmail);
 
-        if((url.contains("/admin") || url.contains("/users/monitors")) && role.equals(Role.ADMIN)){
+        if((url.contains("/admin") || url.contains("/users/monitors") || url.contains("/manualentry") || url.contains("/audit")) && role.equals(Role.ADMIN)){
             servletRequest.setAttribute("user", user);
             filterChain.doFilter(servletRequest, servletResponse);
             return;
-        }else if(url.contains("/users/monitors") &&
+        }else if((url.contains("/users/monitors") || url.contains("/manualentry")) &&
                 role.equals(Role.OPERATOR) &&
                 ("GET".equals(method) || "POST".equals(method) || "PUT".equals(method) || "DELETE".equals(method))) {
             servletRequest.setAttribute("user", user);

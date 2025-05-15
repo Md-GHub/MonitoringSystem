@@ -1,8 +1,8 @@
 package com.md.monitoringsystem.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.md.monitoringsystem.model.MonitorResult;
-import com.md.monitoringsystem.model.PublicMonitorHistory;
+import com.md.monitoringsystem.model.MonitorHistory;
+import com.md.monitoringsystem.model.NotificationDisplay;
 import com.md.monitoringsystem.model.PublicUpDownTime;
 import com.md.monitoringsystem.service.PublicService;
 
@@ -21,22 +21,30 @@ public class PublicServlet extends HttpServlet {
         String timeLine = (req.getParameter("timeline")==null) ? null : req.getParameter("timeline").toString();
         String url = req.getRequestURI();
         boolean isGetHistory = url.contains("history");
+        boolean isNotification = url.contains("notification");
         try{
-            if(!isGetHistory){
+            if(isGetHistory){
+                List<MonitorHistory> results = publicService.getAllMonitorResult(offset);
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(results);
+                resp.setContentType("application/json");
+                resp.getWriter().write(json);
+                resp.setStatus(200);
+            }else if(isNotification){
+                List<NotificationDisplay> results = publicService.getAllNotification();
+                ObjectMapper mapper = new ObjectMapper();
+                String json = mapper.writeValueAsString(results);
+                resp.setContentType("application/json");
+                resp.getWriter().write(json);
+                resp.setStatus(200);
+            }else{
                 List<PublicUpDownTime> result = publicService.getAllPublicUpDownTimes(timeLine, offset);
                 ObjectMapper mapper = new ObjectMapper();
                 String json = mapper.writeValueAsString(result);
                 resp.setContentType("application/json");
                 resp.getWriter().write(json);
                 resp.setStatus(200);
-            }else{
-                List<PublicMonitorHistory> results = publicService.getAllMonitorResult(offset);
-                ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(results);
-                resp.setContentType("application/json");
-                resp.getWriter().write(json);
-                resp.setStatus(200);
-                System.out.println(results.get(0).getTime());
+
             }
         }catch (Exception e){
 

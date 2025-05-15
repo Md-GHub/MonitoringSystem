@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 public class ResolveTImeRepo {
     private String insert = "INSERT INTO RESOLVE_TIME(MONITOR_ID , downAt,reason_for_down) VALUES(?,?,?)";
-    private String update = "UPDATE RESOLVE_TIME SET resolvedAt = ? WHERE MONITOR_ID = ?";
+    private String update = "UPDATE RESOLVE_TIME SET resolvedAt = ? where MONITOR_ID = ? and resolvedAt is null";
     public void insert(ResolveTime resolveTime) {
         Connection conn = PostgresConnections.getConnection();
         try(PreparedStatement statement = conn.prepareStatement(insert)){

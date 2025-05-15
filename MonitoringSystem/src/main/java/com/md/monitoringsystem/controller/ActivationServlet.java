@@ -5,6 +5,7 @@ import com.md.monitoringsystem.exception.NoUserFounded;
 import com.md.monitoringsystem.model.LoginCred;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.UserService;
+import com.md.monitoringsystem.utils.LoggerUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -12,11 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 
 public class ActivationServlet extends HttpServlet {
     private UserService userService = new UserService();
+    private Logger logger = LoggerUtils.getLogger();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 //        int id = Integer.parseInt(req.getParameter("id"));
@@ -46,11 +50,13 @@ public class ActivationServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.setStatus(SC_BAD_REQUEST);
             resp.getWriter().print("{\"status\":\"unsuccess\",\"message\":\""+e.getMessage()+"\"}");
+            logger.info(new Timestamp(System.currentTimeMillis())+" "+e.getMessage());
         }catch (Exception e){
             System.out.println(e.getMessage());
             resp.setContentType("application/json");
             resp.setStatus(SC_BAD_REQUEST);
             resp.getWriter().print("{\"status\":\"unsuccess\",\"message\":\""+e.getMessage()+"\"}");
+            logger.info(new Timestamp(System.currentTimeMillis())+" "+e.getMessage());
         }
     }
     private static boolean isValidPassword(String password) {

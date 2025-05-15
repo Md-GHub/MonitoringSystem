@@ -3,6 +3,7 @@ package com.md.monitoringsystem.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.md.monitoringsystem.model.User;
 import com.md.monitoringsystem.service.UserService;
+import com.md.monitoringsystem.utils.LoggerUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -11,9 +12,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.logging.Logger;
 
 public class CreateServlet extends HttpServlet {
     private UserService userService = new UserService();
+    private Logger logger = LoggerUtils.getLogger();
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         /// read the json (username password)
@@ -34,6 +38,7 @@ public class CreateServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.setContentType("application/json");
             resp.getWriter().print("{\"status\":\"error\",\"message\":\""+e.getMessage()+"\"}");
+            logger.info(new Timestamp(System.currentTimeMillis())+" "+e.getMessage());
         }
     }
 

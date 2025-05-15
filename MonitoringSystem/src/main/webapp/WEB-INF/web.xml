@@ -25,6 +25,10 @@
         <filter-name>RoleBasedAccess</filter-name>
         <url-pattern>/users/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>RoleBasedAccess</filter-name>
+        <url-pattern>/manualentry</url-pattern>
+    </filter-mapping>
     <!--                           2                               -->
     <filter>
         <filter-name>SecurityFilter</filter-name>
@@ -75,6 +79,11 @@
     <servlet-mapping>
         <servlet-name>OperatorServlet</servlet-name>
         <url-pattern>/users/monitors</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>OperatorServlet</servlet-name>
+        <url-pattern>/users/audit</url-pattern>
     </servlet-mapping>
 
 

@@ -32,19 +32,21 @@ public class Task implements Runnable {
             String urlString="http://"+monitor.getUrl();
             URL url=new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(2000);
+            connection.setConnectTimeout(10);
             connection.setRequestMethod("GET");
 
             int statusCode = connection.getResponseCode();
             System.out.println(monitor.getUrl()+" - Status Code: " + statusCode + " "+new Date());
             connection.disconnect();
-            boolean successStatus = (monitor.getStatus().equals(statusCode+""));
+            endTime = System.currentTimeMillis();
 
+            boolean successStatus = (monitor.getStatus().equals(statusCode+""));
             check(successStatus);
             mcs = new MonitorCurrentStatus();
             mcs.setStatus(successStatus);
             mcs.setMonitor(monitor);
-            endTime = System.currentTimeMillis();
+
+
             result.setResponseTime((int) (endTime-startTime));
             result.setStatus(statusCode+"");
             result.setSuccess(successStatus);
@@ -86,7 +88,7 @@ public class Task implements Runnable {
             ResolveTime time = new ResolveTime();
             time.setMonitorId(monitor.getId());
             time.setDownAt(new Timestamp(System.currentTimeMillis()));
-            time.setRemarks("Automated entry : "+monitor.getMonitorName()+" currently in down");
+            time.setRemarks("Automated entry : "+monitor.getMonitorName()+" currently in down (expected status error)");
             resolveTImeRepo.insert(time);
             System.out.println("notification sent");
         }else if(successStatus && tracks.contains(monitor.getId()) && monitor.getNoOfFails() != monitor.getTempCount()){
